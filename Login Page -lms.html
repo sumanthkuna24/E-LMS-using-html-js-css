@@ -1,0 +1,206 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LMS</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <style>
+        /* Your styles remain unchanged */
+        .main{
+            background-color: white;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: rgb(235, 238, 232);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 20px;
+            background-color: #cccccc78
+        }
+
+        .slideshow-container {
+            max-width: 800px;
+            margin: auto;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mySlides {
+            display: none;
+            text-align: center;
+        }
+
+        .course-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px; /* Added border-radius for a more attractive look */
+        }
+
+        .prev, .next {
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            width: auto;
+            margin-top: -30px;
+            padding: 10px;
+            color: rgb(8, 8, 8);
+            font-size: 20px;
+            border-radius: 0 3px 3px 0;
+            user-select: none;
+        }
+
+        .next {
+            right: 0;
+            border-radius: 3px 0 0 3px;
+        }
+
+        .prev:hover, .next:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+        h2{
+            text-align: center;
+            font-style: inherit;
+        }
+
+
+.login-signup {
+    border: 0px solid #ccc;
+    padding: 0px;
+}
+
+.login-signup form {
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.login-signup label {
+    display: block;
+    text-align: center;
+    margin-bottom: 0px;
+}
+
+.login-signup button {
+    background-color: #333;
+    color:antiquewhite;
+    font:bolder;
+    text-decoration: burlywood;
+    border: none;
+    border-radius: 20px 20px;
+    align-content: center;
+    font-family: Arial, sans-serif;
+    padding: 12px 22px;
+    cursor: pointer;
+}
+
+.login-signup button:hover {
+    background-color: #000000;
+}
+
+    </style>
+</head>
+<div class="main">
+<body>
+    <header>
+        <h1>NIRIMI</h1>
+        <P>Online learning platform</P>
+</header>
+    <nav class="navbar">
+       <div class="and" ><a href ="#"> <img  src ="c:\Users\suman\Dropbox\My PC (LAPTOP-5LS7CH73)\Downloads\lms logo2.com.png" style="height: 30px ;width: 90px;"text-align= "left"></a>
+        <a href="#"></a>
+        <a href="#"></a>
+        <a href="#"></a>
+        <a href="#"></a>
+        <a href="#"></a>
+        <a href="newhome page1.html">Home</a>
+        <a href="lms-courses.html">Courses</a>
+        <a href="skill-students1.html">Students</a>
+        <a href="Instructors lms.html">Instructors</a>
+        <a href="Login Page -lms.html">Login</a>
+        <a href="for develop.html">Request Form</a>
+        
+    </nav>
+</div>
+    
+
+<section class="login-signup">
+    <div class="container">
+            <h3>Login or Sign Up</h3>
+            <form id="login-form">
+                <label for="username">Username:</label>
+                <input type="text" id="login-username" name="username" required>
+    
+                <label for="password">Password:</label>
+                <input type="password" id="login-password" name="password" required>
+    
+                <button type="button" onclick="login()">Login</button>
+            </form> 
+            <p>Don't have an account? <a href="#" onclick="showSignupForm()">Sign Up</a></p>
+        </section>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+        <script>
+            function login() {
+                var username = document.getElementById("login-username").value;
+                var password = document.getElementById("login-password").value;
+    
+                // Perform validation and authentication (not secure for production)
+                if (username === "exampleUser" && password === "examplePassword") {
+                    alert("Login successful!");
+                    // Redirect to the user's dashboard or another page
+                } else {
+                    alert("Login failed. Check your username and password.");
+                }
+            }
+    
+            function signup() {
+                var newUsername = document.getElementById("new-username").value;
+                var newPassword = document.getElementById("new-password").value;
+    
+                // Perform user registration (not secure for production)
+                alert("Registration successful! You can now log in with your new account.");
+                // You should save this information to a database on the server.
+            }
+    
+            function showSignupForm() {
+                document.getElementById("login-form").style.display = "none";
+                document.getElementById("signup-form").style display= "block";
+            }
+        </script>
+
+
+
+
+
+    </body>
+    </html>
+    
+    

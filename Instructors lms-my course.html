@@ -1,0 +1,146 @@
+my Courses/Instructors
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Instructor Portal</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+
+        
+
+        nav {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            padding: 15px 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .hero h2 {
+            font-size: 24px;
+        }
+
+        .login-signup {
+            border: 1px solid #ccc;
+            padding: 20px;
+        }
+
+        .login-signup form {
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .login-signup label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .login-signup input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+
+        .courses {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .courses h2 {
+            font-size: 24px;
+        }
+
+        .course-card {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin: 20px;
+            display: inline-block;
+            max-width: 300px;
+            text-align: left;
+            background-color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Instructor Portal</h1>
+    </header>
+    <nav class="navbar">
+        <a href="newhome page1.html">Home</a>
+        <a href="lms-courses.html">Courses</a>
+        <a href="skill-students1.html">Students</a>
+        <a href="Instructors lms.html">Instructors</a>
+        <a href="Login Page -lms.html">Login</a>
+    </nav>
+    <div class="container">
+        <section class="hero">
+            <h2>Welcome, Instructors</h2>
+            <p>Manage your courses and interact with your students.</p>
+            <a href="Instructors lms.html">Back To Login Page</a>
+        </section>
+        
+    
+        
+        <section class="courses">
+            <h2>My Courses</h2>
+            <div class="course-card">
+                <img src="course1.jpg" alt="Course 1">
+                <h3>Machine Learning Basics</h3>
+            <p>Explore the fundamentals of machine learning and artificial intelligence.</p>
+                <a href="#">View Course</a>
+            </div>
+            <div class="course-card">
+                <img src="course2.jpg" alt="Course 2">
+                <h3>Course Name 2</h3>
+                <p>Course Description: Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                <a href="#">View Course</a>
+            </div>
+            <div class="course-card">
+                <img src="course3.jpg" alt="Course 3">
+                <h3>Data Science Basics</h3>
+                <p>Unlock the world of data science and analytics with this course.</p>
+                <a href="#">View Course</a>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function login() {
+            var username = document.getElementById("login-username").value;
+            var password = document.getElementById("login-password").value;
+
+            // Perform validation and authentication (not secure for production)
+            if (username === "exampleInstructor" && password === "examplePassword") {
+                alert("Login successful!");
+                // Redirect to the instructor's dashboard or another page
+            } else {
+                alert("Login failed. Check your username and password.");
+            }
+        }
+    </script>
+</body>
+</html>
