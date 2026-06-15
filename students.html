@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIRIMI Learn - Student Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- NAVIGATION BAR -->
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">
+            NIRIMI Learn <span class="logo-dot"></span>
+        </a>
+        <div class="nav-links">
+            <!-- Populated dynamically by db.js -->
+        </div>
+    </nav>
+
+    <!-- MAIN DASHBOARD CONTENT -->
+    <div class="container">
+        <!-- Auth check placeholder (will hide/show via script) -->
+        <div id="unauthorized-message" style="display: none; text-align: center; padding: 100px 20px;">
+            <span style="font-size: 64px;">🔒</span>
+            <h2 style="margin-top: 20px; margin-bottom: 10px;">Access Denied</h2>
+            <p style="color: var(--text-muted); margin-bottom: 30px;">You must be logged in as a student to view this dashboard.</p>
+            <a href="login.html?redirect=students.html" class="nav-btn nav-btn-primary">Sign In Now</a>
+        </div>
+
+        <div id="dashboard-content" style="display: none;">
+            
+            <div class="section-header">
+                <div>
+                    <h1 class="section-title">My Learning Portal</h1>
+                    <p style="color: var(--text-muted); font-size: 14px;">Review your registered courses, lesson checklists, and pick up where you left off.</p>
+                </div>
+            </div>
+
+            <!-- DASHBOARD GRID: SIDEBAR & MAIN BODY -->
+            <div class="dashboard-grid">
+                
+                <!-- SIDEBAR PROFILE BOX -->
+                <aside class="dashboard-sidebar-profile">
+                    <div class="profile-avatar" id="stud-avatar">S</div>
+                    <h3 class="profile-name" id="stud-name">Student User</h3>
+                    <p class="profile-role">Student Member</p>
+                    
+                    <div class="profile-stat-box">
+                        <div>
+                            <div class="profile-stat" id="stat-enrolled-count">0</div>
+                            <div class="profile-stat-label">Courses</div>
+                        </div>
+                        <div>
+                            <div class="profile-stat" id="stat-completed-count">0</div>
+                            <div class="profile-stat-label">Finished</div>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- MAIN PANEL -->
+                <main style="display: flex; flex-direction: column; gap: 30px;">
+                    
+                    <!-- ENROLLED COURSES SECTION -->
+                    <div>
+                        <h2 style="font-size: 22px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                            <span>📖</span> Active Enrollments
+                        </h2>
+                        
+                        <div id="enrolled-courses-list">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- EXCLUSIVE FREE SECTION DISCOUNTS (From original coursework) -->
+                    <div style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 30px;">
+                        <div style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(236, 72, 153, 0.1)); border: 1px dashed var(--primary); padding: 30px; border-radius: var(--radius-md);">
+                            <h2 style="font-size: 20px; color: var(--primary); margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                                <span>🎁</span> Special Offers for Section K23FK
+                            </h2>
+                            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">
+                                Logged in students can enroll in the following courses instantly for FREE.
+                            </p>
+
+                            <div class="course-grid" id="exclusive-courses-grid" style="grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px;">
+                                <!-- Loaded dynamically with free courses -->
+                            </div>
+                        </div>
+                    </div>
+
+                </main>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 NIRIMI Learn. Designed for next-generation styles and microlearning.</p>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script src="assets/js/db.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const user = LMS_DB.getCurrentUser();
+            
+            // Redirect if not student
+            if (!user || user.role !== "student") {
+                document.getElementById("unauthorized-message").style.display = "block";
+                return;
+            }
+
+            document.getElementById("dashboard-content").style.display = "block";
+            
+            // Set up profile badge
+            document.getElementById("stud-name").textContent = user.username;
+            document.getElementById("stud-avatar").textContent = user.username.charAt(0).toUpperCase();
+
+            renderDashboardData();
+        });
+
+        function renderDashboardData() {
+            const user = LMS_DB.getCurrentUser();
+            const enrollments = LMS_DB.getStudentEnrollments(user.id);
+            const listContainer = document.getElementById("enrolled-courses-list");
+            
+            // Update profile statistics
+            document.getElementById("stat-enrolled-count").textContent = enrollments.length;
+            const completedCount = enrollments.filter(e => e.progressPercent === 100).length;
+            document.getElementById("stat-completed-count").textContent = completedCount;
+
+            // Render Enrolled Courses
+            if (enrollments.length === 0) {
+                listContainer.innerHTML = `
+                    <div style="background: var(--bg-surface); border: 1px solid var(--border-color); padding: 40px; border-radius: var(--radius-md); text-align: center;">
+                        <span style="font-size: 40px; display: block; margin-bottom: 12px;">📚</span>
+                        <h4 style="margin-bottom: 6px;">No Enrolled Courses</h4>
+                        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">You haven't registered for any classes yet.</p>
+                        <a href="courses.html" class="nav-btn nav-btn-primary">Browse Course Directory</a>
+                    </div>
+                `;
+            } else {
+                listContainer.innerHTML = enrollments.map(e => {
+                    const course = e.courseDetails;
+                    return `
+                        <div class="enrolled-card">
+                            <img src="${course.image}" alt="${course.title}" class="enrolled-img">
+                            <div class="enrolled-info">
+                                <h3 class="enrolled-title">${course.title}</h3>
+                                <p style="color: var(--text-muted); font-size: 13px;">Instructor: <strong>${course.instructor}</strong></p>
+                                
+                                <div class="enrolled-progress-row">
+                                    <div class="enrolled-progress-wrapper">
+                                        <div class="progress-container">
+                                            <div class="progress-bar" style="width: ${e.progressPercent}%"></div>
+                                        </div>
+                                    </div>
+                                    <span style="font-size: 13px; font-weight: 600; min-width: 40px; text-align: right;">${e.progressPercent}%</span>
+                                </div>
+                            </div>
+                            <a href="player.html?courseId=${course.id}" class="nav-btn nav-btn-primary" style="padding: 10px 24px; text-align: center;">
+                                ${e.progressPercent === 0 ? "Start Course" : e.progressPercent === 100 ? "Review Course" : "Resume"}
+                            </a>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Render Exclusive Section Offers
+            renderExclusiveOffers(enrollments.map(e => e.courseId));
+        }
+
+        function renderExclusiveOffers(enrolledIds) {
+            const courses = LMS_DB.getCourses();
+            const grid = document.getElementById("exclusive-courses-grid");
+
+            // Filter courses not enrolled in
+            const offerCourses = courses.filter(c => !enrolledIds.includes(c.id)).slice(0, 3);
+
+            if (offerCourses.length === 0) {
+                grid.parentElement.style.display = "none"; // Hide panel if student is enrolled in everything
+                return;
+            }
+
+            grid.innerHTML = offerCourses.map(course => {
+                return `
+                    <div class="card" style="background: var(--bg-surface);">
+                        <div class="card-img-container" style="height: 140px;">
+                            <span class="card-tag" style="background: hsl(140, 70%, 15%); color: hsl(140, 80%, 75%); border-color: hsl(140, 70%, 25%);">FREE Offer</span>
+                            <img src="${course.image}" alt="${course.title}">
+                        </div>
+                        <div class="card-body" style="padding: 16px;">
+                            <h4 style="font-size: 16px; margin-bottom: 6px;">${course.title}</h4>
+                            <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 16px;">${course.instructor}</p>
+                            <button class="card-action-btn" style="width: 100%; font-size: 12px;" onclick="claimFreeCourse('${course.id}')">Enroll Free</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function claimFreeCourse(courseId) {
+            const user = LMS_DB.getCurrentUser();
+            const res = LMS_DB.enrollStudent(user.id, courseId);
+            if (res.success) {
+                showToast("Enrolled in free section offer successfully!", "success");
+                renderDashboardData();
+            } else {
+                showToast(res.message, "error");
+            }
+        }
+    </script>
+</body>
+</html>

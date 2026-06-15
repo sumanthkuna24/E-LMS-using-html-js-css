@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIRIMI Learn - Course Request</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- NAVIGATION BAR -->
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">
+            NIRIMI Learn <span class="logo-dot"></span>
+        </a>
+        <div class="nav-links">
+            <!-- Populated dynamically by db.js -->
+        </div>
+    </nav>
+
+    <!-- MAIN FORM WRAPPER -->
+    <div class="container">
+        
+        <!-- Auth check placeholder -->
+        <div id="request-unauthorized" style="display: none; text-align: center; padding: 100px 20px;">
+            <span style="font-size: 64px;">🔒</span>
+            <h2 style="margin-top: 20px; margin-bottom: 10px;">Login Required</h2>
+            <p style="color: var(--text-muted); margin-bottom: 30px;">You need to be logged in as a student to request custom courses.</p>
+            <a href="login.html?redirect=request.html" class="nav-btn nav-btn-primary">Sign In</a>
+        </div>
+
+        <div id="request-workspace" style="display: none;">
+            
+            <div class="form-card" style="max-width: 600px; margin-top: 0;">
+                <div class="form-header">
+                    <h2>Request a New Course</h2>
+                    <p>Can't find what you are looking for? Pitch your custom curriculum requirements to our instructors.</p>
+                </div>
+
+                <form id="course-request-form" onsubmit="handleRequestSubmit(event)">
+                    <!-- Contact Group -->
+                    <div class="form-group">
+                        <label for="req-name">Your Full Name</label>
+                        <input type="text" id="req-name" required placeholder="e.g. John Doe">
+                    </div>
+
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label for="req-email">Email Address</label>
+                            <input type="email" id="req-email" required placeholder="e.g. john@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="req-phone">Mobile Number</label>
+                            <input type="tel" id="req-phone" required placeholder="e.g. +1234567890">
+                        </div>
+                    </div>
+
+                    <!-- Gender Radio Option (From original coursework) -->
+                    <div class="form-group">
+                        <label>Gender</label>
+                        <div style="display: flex; gap: 20px; padding: 10px 0;">
+                            <label style="display: flex; align-items: center; gap: 6px; font-weight: 500; text-transform: none; cursor: pointer;">
+                                <input type="radio" name="req-gender" value="Male" required checked style="width: auto; margin: 0;"> Male
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 6px; font-weight: 500; text-transform: none; cursor: pointer;">
+                                <input type="radio" name="req-gender" value="Female" style="width: auto; margin: 0;"> Female
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 6px; font-weight: 500; text-transform: none; cursor: pointer;">
+                                <input type="radio" name="req-gender" value="Other" style="width: auto; margin: 0;"> Other
+                            </label>
+                        </div>
+                    </div>
+
+                    <div style="border-top: 1px solid var(--border-color); margin-top: 24px; padding-top: 24px;">
+                        <h4 style="margin-bottom: 16px; color: var(--primary);">Course Request Details</h4>
+                    </div>
+
+                    <!-- Course Title -->
+                    <div class="form-group">
+                        <label for="req-title">Proposed Course Title</label>
+                        <input type="text" id="req-title" required placeholder="e.g. Introduction to Next.js">
+                        <span style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 4px;">Provide a descriptive title of the topic you want to learn.</span>
+                    </div>
+
+                    <!-- Course Category checkboxes (From original coursework) -->
+                    <div class="form-group">
+                        <label>Course Classification</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 6px 0;">
+                            <label style="display: flex; align-items: center; gap: 8px; font-weight: 500; text-transform: none; cursor: pointer;">
+                                <input type="checkbox" class="req-category" value="Technical" checked style="width: auto; margin: 0;"> Technical Code
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; font-weight: 500; text-transform: none; cursor: pointer;">
+                                <input type="checkbox" class="req-category" value="Non-Technical" style="width: auto; margin: 0;"> Non-Technical Industry
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; font-weight: 500; text-transform: none; cursor: pointer;">
+                                <input type="checkbox" class="req-category" value="Soft Skills" style="width: auto; margin: 0;"> Soft Communications
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; font-weight: 500; text-transform: none; cursor: pointer;">
+                                <input type="checkbox" class="req-category" value="Micro Degree" style="width: auto; margin: 0;"> Full Micro Degree
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Dropdown list related to (From original coursework) -->
+                    <div class="form-group">
+                        <label for="req-field">Primary Focus Area</label>
+                        <select id="req-field" required>
+                            <option value="Frontend">Frontend Web Design</option>
+                            <option value="Backend">Backend Server Dev</option>
+                            <option value="Full Stack">Full Stack Systems</option>
+                            <option value="Data Analytics">Data Analytics & Metrics</option>
+                            <option value="Other">Other Subjects</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="form-submit-btn">Submit Syllabus Request</button>
+                </form>
+            </div>
+
+            <!-- PREVIOUS REQUEST TRACKER -->
+            <div style="margin-top: 40px;">
+                <h3 style="font-size: 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                    <span>📋</span> My Requested Courses
+                </h3>
+                
+                <div class="table-container">
+                    <table id="requests-history-table">
+                        <thead>
+                            <tr>
+                                <th>Subject Title</th>
+                                <th>Category Tag</th>
+                                <th>Field</th>
+                                <th>Submitted Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Loaded dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 NIRIMI Learn. Designed for next-generation styles and microlearning.</p>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script src="assets/js/db.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const user = LMS_DB.getCurrentUser();
+
+            if (!user || user.role !== "student") {
+                document.getElementById("request-unauthorized").style.display = "block";
+                return;
+            }
+
+            document.getElementById("request-workspace").style.display = "block";
+            
+            // Auto fill fields
+            document.getElementById("req-name").value = user.username;
+            document.getElementById("req-email").value = user.email || "";
+
+            renderRequestsHistory();
+        });
+
+        function renderRequestsHistory() {
+            const user = LMS_DB.getCurrentUser();
+            const requests = LMS_DB.getRequests().filter(r => r.email === user.email);
+            const tbody = document.querySelector("#requests-history-table tbody");
+
+            if (requests.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 30px; color: var(--text-muted);">
+                            You haven't submitted any custom requests yet.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = requests.map(r => {
+                return `
+                    <tr>
+                        <td style="color: #fff; font-weight: 500;">${r.courseName}</td>
+                        <td>${r.category}</td>
+                        <td>${r.field}</td>
+                        <td>${r.date}</td>
+                        <td><span class="status-badge ${r.status}">${r.status}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function handleRequestSubmit(e) {
+            e.preventDefault();
+
+            const name = document.getElementById("req-name").value.trim();
+            const email = document.getElementById("req-email").value.trim();
+            const phone = document.getElementById("req-phone").value.trim();
+            const gender = document.querySelector("input[name='req-gender']:checked").value;
+            const title = document.getElementById("req-title").value.trim();
+            const field = document.getElementById("req-field").value;
+
+            // Get selected categories checkmark tags
+            const catElements = document.querySelectorAll(".req-category:checked");
+            const categories = Array.from(catElements).map(el => el.value).join(", ") || "General";
+
+            const res = LMS_DB.submitCourseRequest(name, email, phone, gender, title, categories, field);
+            
+            if (res.success) {
+                showToast("Request submitted successfully! Faculty will review it.", "success");
+                document.getElementById("course-request-form").reset();
+                
+                // Keep credentials prefilled
+                const user = LMS_DB.getCurrentUser();
+                document.getElementById("req-name").value = user.username;
+                document.getElementById("req-email").value = user.email || "";
+
+                renderRequestsHistory();
+            } else {
+                showToast("Failed to submit request.", "error");
+            }
+        }
+    </script>
+</body>
+</html>

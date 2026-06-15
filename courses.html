@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIRIMI Learn - Courses</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- NAVIGATION BAR -->
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">
+            NIRIMI Learn <span class="logo-dot"></span>
+        </a>
+        <div class="nav-links">
+            <!-- Populated dynamically by db.js -->
+        </div>
+    </nav>
+
+    <!-- MAIN CONTAINER -->
+    <div class="container">
+        <div class="section-header">
+            <div>
+                <h1 class="section-title" style="margin-bottom: 8px;">Explore Our Courses</h1>
+                <p style="color: var(--text-muted); font-size: 14px;">Expand your knowledge with high-quality syllabus paths led by industry leaders.</p>
+            </div>
+        </div>
+
+        <!-- SEARCH AND FILTER -->
+        <div class="controls-row">
+            <div class="search-box">
+                <input type="text" id="course-search-input" placeholder="Search by course title or keyword...">
+            </div>
+            
+            <div class="filter-group" id="filter-pills-group">
+                <button class="filter-btn active" data-category="all">All</button>
+                <button class="filter-btn" data-category="Frontend">Frontend</button>
+                <button class="filter-btn" data-category="AI">Artificial Intelligence</button>
+                <button class="filter-btn" data-category="Data Science">Data Science</button>
+                <button class="filter-btn" data-category="General">General</button>
+            </div>
+        </div>
+
+        <!-- COURSES GRID -->
+        <div class="course-grid" id="courses-grid-container">
+            <!-- Populated dynamically -->
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 NIRIMI Learn. Designed for next-generation styles and microlearning.</p>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script src="assets/js/db.js"></script>
+    <script>
+        let currentFilter = "all";
+        let searchQuery = "";
+
+        document.addEventListener("DOMContentLoaded", () => {
+            renderCourses();
+
+            // Set up search event
+            const searchInput = document.getElementById("course-search-input");
+            searchInput.addEventListener("input", (e) => {
+                searchQuery = e.target.value.toLowerCase().trim();
+                renderCourses();
+            });
+
+            // Set up filter pill click events
+            const filterBtns = document.querySelectorAll(".filter-btn");
+            filterBtns.forEach(btn => {
+                btn.addEventListener("click", () => {
+                    filterBtns.forEach(b => b.classList.remove("active"));
+                    btn.classList.add("active");
+                    currentFilter = btn.getAttribute("data-category");
+                    renderCourses();
+                });
+            });
+        });
+
+        function renderCourses() {
+            const courses = LMS_DB.getCourses();
+            const currentUser = LMS_DB.getCurrentUser();
+            const grid = document.getElementById("courses-grid-container");
+
+            // Filter courses based on active settings
+            const filteredCourses = courses.filter(course => {
+                const matchesCategory = currentFilter === "all" || course.category === currentFilter;
+                const matchesSearch = course.title.toLowerCase().includes(searchQuery) || 
+                                      course.description.toLowerCase().includes(searchQuery) ||
+                                      course.instructor.toLowerCase().includes(searchQuery);
+                return matchesCategory && matchesSearch;
+            });
+
+            if (filteredCourses.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+                        <span style="font-size: 48px; display: block; margin-bottom: 16px;">🔍</span>
+                        <h3 style="margin-bottom: 8px;">No courses found</h3>
+                        <p style="color: var(--text-muted); font-size: 14px;">Try checking your spelling or selecting a different filter.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Get current user enrollments if logged in as student
+            let enrolledCourseIds = [];
+            if (currentUser && currentUser.role === "student") {
+                const enrollments = LMS_DB.getStudentEnrollments(currentUser.id);
+                enrolledCourseIds = enrollments.map(e => e.courseId);
+            }
+
+            grid.innerHTML = filteredCourses.map(course => {
+                let btnHtml = "";
+                
+                if (!currentUser) {
+                    btnHtml = `<button class="card-action-btn" onclick="handleEnrollClick('${course.id}')">Enroll Now</button>`;
+                } else if (currentUser.role === "student") {
+                    if (enrolledCourseIds.includes(course.id)) {
+                        btnHtml = `<a href="player.html?courseId=${course.id}" class="card-action-btn card-action-btn-outline">Go to Class</a>`;
+                    } else {
+                        btnHtml = `<button class="card-action-btn" onclick="handleEnrollClick('${course.id}')">Enroll Now</button>`;
+                    }
+                } else if (currentUser.role === "instructor") {
+                    btnHtml = `<button class="card-action-btn card-action-btn-outline" style="cursor: not-allowed; opacity: 0.6;" disabled>Instructor Mode</button>`;
+                }
+
+                return `
+                    <div class="card">
+                        <div class="card-img-container">
+                            <span class="card-tag">${course.category}</span>
+                            <img src="${course.image}" alt="${course.title}">
+                        </div>
+                        <div class="card-body">
+                            <h3 class="card-title">${course.title}</h3>
+                            <p class="card-desc">${course.description}</p>
+                            <div class="card-footer">
+                                <span class="card-instructor">By ${course.instructor}</span>
+                                ${btnHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function handleEnrollClick(courseId) {
+            const currentUser = LMS_DB.getCurrentUser();
+            
+            if (!currentUser) {
+                showToast("Please log in as a student to enroll in courses.", "info");
+                setTimeout(() => {
+                    window.location.href = `login.html?redirect=courses.html&enroll=${courseId}`;
+                }, 1500);
+                return;
+            }
+
+            if (currentUser.role !== "student") {
+                showToast("Only students can enroll in courses.", "error");
+                return;
+            }
+
+            const res = LMS_DB.enrollStudent(currentUser.id, courseId);
+            if (res.success) {
+                showToast("Enrolled successfully! Opening your course player...", "success");
+                setTimeout(() => {
+                    window.location.href = `player.html?courseId=${courseId}`;
+                }, 1500);
+            } else {
+                showToast(res.message, "error");
+            }
+        }
+    </script>
+</body>
+</html>

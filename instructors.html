@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIRIMI Learn - Instructor Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- NAVIGATION BAR -->
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">
+            NIRIMI Learn <span class="logo-dot"></span>
+        </a>
+        <div class="nav-links">
+            <!-- Populated dynamically by db.js -->
+        </div>
+    </nav>
+
+    <!-- MAIN PORTAL BODY -->
+    <div class="container">
+        
+        <!-- Auth check placeholder -->
+        <div id="inst-unauthorized" style="display: none; text-align: center; padding: 100px 20px;">
+            <span style="font-size: 64px;">🔒</span>
+            <h2 style="margin-top: 20px; margin-bottom: 10px;">Access Restricted</h2>
+            <p style="color: var(--text-muted); margin-bottom: 30px;">This portal is reserved for academic faculty and course coordinators.</p>
+            <a href="login.html?redirect=instructors.html" class="nav-btn nav-btn-primary">Instructor Log In</a>
+        </div>
+
+        <div id="inst-workspace" style="display: none;">
+            
+            <div class="section-header">
+                <div>
+                    <h1 class="section-title">Faculty Coordinator Portal</h1>
+                    <p style="color: var(--text-muted); font-size: 14px;">Manage courses, add video lecture paths, and review student requests.</p>
+                </div>
+            </div>
+
+            <!-- DASHBOARD GRID LAYOUT -->
+            <div class="dashboard-grid">
+                
+                <!-- SIDEBAR PANEL -->
+                <aside class="dashboard-sidebar-profile">
+                    <div class="profile-avatar" style="background: linear-gradient(135deg, var(--accent), var(--primary));">F</div>
+                    <h3 class="profile-name" id="inst-profile-name">Faculty Member</h3>
+                    <p class="profile-role">Instructor Coordinator</p>
+                    
+                    <div class="profile-stat-box" style="grid-template-columns: 1fr;">
+                        <div>
+                            <div class="profile-stat" id="stat-courses-total">0</div>
+                            <div class="profile-stat-label">System Courses</div>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- MAIN WORKSPACE -->
+                <main style="display: flex; flex-direction: column; gap: 40px;">
+                    
+                    <!-- 1. COURSE LIST & CREATE FORM -->
+                    <div class="instructor-add-course-container">
+                        <h2 style="font-size: 20px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                            <span>🆕</span> Create a New Course
+                        </h2>
+                        
+                        <form id="create-course-form" onsubmit="handleCreateCourse(event)">
+                            <div class="form-group-row">
+                                <div class="form-group">
+                                    <label for="course-title-input">Course Title</label>
+                                    <input type="text" id="course-title-input" required placeholder="e.g. Next.js Foundations">
+                                </div>
+                                <div class="form-group">
+                                    <label for="course-category-select">Category</label>
+                                    <select id="course-category-select" required>
+                                        <option value="Frontend">Frontend</option>
+                                        <option value="Backend">Backend</option>
+                                        <option value="AI">Artificial Intelligence</option>
+                                        <option value="Data Science">Data Science</option>
+                                        <option value="General">General</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="course-desc-input">Syllabus Description</label>
+                                <textarea id="course-desc-input" required rows="3" placeholder="Provide a brief summary of the curriculum..."></textarea>
+                            </div>
+
+                            <!-- Dynamic Lesson Inputs -->
+                            <div class="dynamic-lessons-wrapper">
+                                <h4 style="margin-bottom: 12px; font-size: 14px; color: var(--primary);">Course Lessons & YouTube Videos</h4>
+                                <p style="color: var(--text-muted); font-size: 11px; margin-bottom: 16px;">
+                                    Provide YouTube video links (e.g. https://www.youtube.com/watch?v=...) to embed inside the student player.
+                                </p>
+                                
+                                <div id="lessons-inputs-list">
+                                    <!-- Lesson rows appended here -->
+                                </div>
+
+                                <div class="add-lesson-btn" onclick="addLessonInputRow()">
+                                    + Add Another Lesson Module
+                                </div>
+                            </div>
+
+                            <button type="submit" class="form-submit-btn">Publish Course Catalog</button>
+                        </form>
+                    </div>
+
+                    <!-- 2. COURSE REGISTRATION ANALYTICS -->
+                    <div>
+                        <h2 style="font-size: 20px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                            <span>📊</span> Course Enrollments Analytics
+                        </h2>
+                        <div class="table-container">
+                            <table id="analytics-table">
+                                <thead>
+                                    <tr>
+                                        <th>Course Subject</th>
+                                        <th>Subject Group</th>
+                                        <th>Instructor</th>
+                                        <th>Enrolled Students</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Loaded dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 3. INCOMING STUDENT COURSE REQUESTS -->
+                    <div>
+                        <h2 style="font-size: 20px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                            <span>📩</span> Student Course Requests
+                        </h2>
+                        
+                        <div class="table-container">
+                            <table id="requests-review-table">
+                                <thead>
+                                    <tr>
+                                        <th>Requested By</th>
+                                        <th>Syllabus Request</th>
+                                        <th>Field Area</th>
+                                        <th>Contact Email</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Loaded dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </main>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 NIRIMI Learn. Designed for next-generation styles and microlearning.</p>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script src="assets/js/db.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const user = LMS_DB.getCurrentUser();
+
+            if (!user || user.role !== "instructor") {
+                document.getElementById("inst-unauthorized").style.display = "block";
+                return;
+            }
+
+            document.getElementById("inst-workspace").style.display = "block";
+            document.getElementById("inst-profile-name").textContent = user.username;
+
+            // Load initial dynamic lesson rows
+            addLessonInputRow("What is Next.js?", "https://www.youtube.com/watch?v=Sklc_fQBmcs", "10:30");
+            addLessonInputRow("Routing & Pages", "https://www.youtube.com/watch?v=mTz0gxle4K0", "15:00");
+
+            renderPortalData();
+        });
+
+        let lessonRowCount = 0;
+
+        function addLessonInputRow(title = "", url = "", duration = "") {
+            lessonRowCount++;
+            const list = document.getElementById("lessons-inputs-list");
+            const row = document.createElement("div");
+            row.className = "dynamic-lesson-row";
+            row.id = `lesson-row-${lessonRowCount}`;
+            row.innerHTML = `
+                <input type="text" class="lesson-title" required placeholder="Lesson Title" value="${title}">
+                <input type="url" class="lesson-url" required placeholder="YouTube URL" value="${url}">
+                <input type="text" class="lesson-duration" required placeholder="15:00" value="${duration}">
+                <button type="button" class="nav-btn nav-btn-outline" style="border-color: hsl(0, 50%, 50%); color: hsl(0, 80%, 75%) !important;" onclick="removeLessonInputRow(${lessonRowCount})">&times;</button>
+            `;
+            list.appendChild(row);
+        }
+
+        function removeLessonInputRow(id) {
+            const row = document.getElementById(`lesson-row-${id}`);
+            if (row) row.remove();
+        }
+
+        function renderPortalData() {
+            const courses = LMS_DB.getCourses();
+            const enrollments = LMS_DB.getEnrollments();
+            const requests = LMS_DB.getRequests();
+
+            // Set system stats
+            document.getElementById("stat-courses-total").textContent = courses.length;
+
+            // 1. Render Analytics table
+            const analyticsBody = document.querySelector("#analytics-table tbody");
+            analyticsBody.innerHTML = courses.map(course => {
+                const count = enrollments.filter(e => e.courseId === course.id).length;
+                return `
+                    <tr>
+                        <td style="color: #fff; font-weight: 500;">${course.title}</td>
+                        <td>${course.category}</td>
+                        <td>${course.instructor}</td>
+                        <td style="color: var(--primary); font-weight: 600;">${count} Students</td>
+                    </tr>
+                `;
+            }).join('');
+
+            // 2. Render Student Course Requests
+            const requestsBody = document.querySelector("#requests-review-table tbody");
+            if (requests.length === 0) {
+                requestsBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 24px; color: var(--text-muted);">
+                            No incoming course requests.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            requestsBody.innerHTML = requests.map(r => {
+                let actionBtn = "";
+                if (r.status === "pending") {
+                    actionBtn = `<button class="card-action-btn" style="padding: 6px 12px; font-size: 11px;" onclick="approveRequest('${r.id}')">Approve</button>`;
+                } else {
+                    actionBtn = `<span style="font-size: 11px; color: var(--text-muted);">Processed</span>`;
+                }
+
+                return `
+                    <tr>
+                        <td style="color: #fff;">${r.name}</td>
+                        <td>${r.courseName}</td>
+                        <td>${r.field}</td>
+                        <td>${r.email}</td>
+                        <td><span class="status-badge ${r.status}">${r.status}</span></td>
+                        <td>${actionBtn}</td>
+                    </tr>
+                `;
+            }).join('').split('').reverse().join('').split('').reverse().join(''); // keep order consistent
+        }
+
+        function approveRequest(requestId) {
+            const requests = LMS_DB.getData(LMS_DB.KEYS.REQUESTS);
+            const index = requests.findIndex(r => r.id === requestId);
+            if (index !== -1) {
+                requests[index].status = "approved";
+                LMS_DB.saveData(LMS_DB.KEYS.REQUESTS, requests);
+                showToast("Request approved!", "success");
+                renderPortalData();
+            }
+        }
+
+        function handleCreateCourse(e) {
+            e.preventDefault();
+
+            const title = document.getElementById("course-title-input").value.trim();
+            const category = document.getElementById("course-category-select").value;
+            const desc = document.getElementById("course-desc-input").value.trim();
+            const instructor = LMS_DB.getCurrentUser().username;
+
+            // Extract lessons
+            const rows = document.querySelectorAll(".dynamic-lesson-row");
+            const lessonsList = [];
+            
+            if (rows.length === 0) {
+                showToast("Please add at least one lesson video to your course.", "error");
+                return;
+            }
+
+            rows.forEach(row => {
+                const lessonTitle = row.querySelector(".lesson-title").value.trim();
+                const lessonUrl = row.querySelector(".lesson-url").value.trim();
+                const lessonDur = row.querySelector(".lesson-duration").value.trim();
+                
+                lessonsList.push({
+                    title: lessonTitle,
+                    url: lessonUrl,
+                    duration: lessonDur
+                });
+            });
+
+            const newCourse = LMS_DB.addCourse(title, category, desc, lessonsList, instructor);
+            
+            showToast(`Course "${title}" created and published!`, "success");
+            
+            // Reset form
+            document.getElementById("create-course-form").reset();
+            document.getElementById("lessons-inputs-list").innerHTML = "";
+            lessonRowCount = 0;
+            addLessonInputRow("What is Next.js?", "https://www.youtube.com/watch?v=Sklc_fQBmcs", "10:30");
+            
+            renderPortalData();
+        }
+    </script>
+</body>
+</html>

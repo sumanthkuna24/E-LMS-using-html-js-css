@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIRIMI Learn - Authentication</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- NAVIGATION BAR -->
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">
+            NIRIMI Learn <span class="logo-dot"></span>
+        </a>
+        <div class="nav-links">
+            <!-- Populated dynamically by db.js -->
+        </div>
+    </nav>
+
+    <!-- MAIN LOGIN CARD CONTAINER -->
+    <div class="container">
+        <div class="form-card">
+            
+            <div class="form-header">
+                <h2 id="auth-title">Welcome Back</h2>
+                <p id="auth-subtitle">Log in to your student account to resume learning.</p>
+            </div>
+
+            <!-- TOGGLE MODE TABS -->
+            <div class="form-toggle-tabs">
+                <div class="form-tab active" id="tab-student-login" onclick="switchTab('student-login')">Student Sign In</div>
+                <div class="form-tab" id="tab-student-signup" onclick="switchTab('student-signup')">Student Sign Up</div>
+                <div class="form-tab" id="tab-instructor-login" onclick="switchTab('instructor-login')">Instructor</div>
+            </div>
+
+            <!-- AUTH FORM -->
+            <form id="auth-form" onsubmit="handleAuthSubmit(event)">
+                <!-- Username or Email Field -->
+                <div class="form-group" id="grp-username">
+                    <label for="username-input" id="lbl-username">Username or Email</label>
+                    <input type="text" id="username-input" required placeholder="e.g. student">
+                </div>
+
+                <!-- Email Field (Only for Signup) -->
+                <div class="form-group" id="grp-email" style="display: none;">
+                    <label for="email-input">Email Address</label>
+                    <input type="email" id="email-input" placeholder="e.g. student@nirimi.com">
+                </div>
+
+                <!-- Password Field -->
+                <div class="form-group">
+                    <label for="password-input">Password</label>
+                    <input type="password" id="password-input" required placeholder="••••••••">
+                </div>
+
+                <!-- Confirm Password Field (Only for Signup) -->
+                <div class="form-group" id="grp-confirm-password" style="display: none;">
+                    <label for="confirm-password-input">Confirm Password</label>
+                    <input type="password" id="confirm-password-input" placeholder="••••••••">
+                </div>
+
+                <button type="submit" class="form-submit-btn" id="submit-btn">Sign In</button>
+            </form>
+
+            <div class="form-footer-link" id="form-helper-text">
+                Don't have an account? <a href="#" onclick="switchTab('student-signup')">Create one here</a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 NIRIMI Learn. Designed for next-generation styles and microlearning.</p>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script src="assets/js/db.js"></script>
+    <script>
+        // Track current active state
+        let currentMode = "student-login"; // student-login, student-signup, instructor-login
+
+        // Get query parameters for redirects
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectPage = urlParams.get("redirect");
+        const enrollCourseId = urlParams.get("enroll");
+
+        function switchTab(mode) {
+            currentMode = mode;
+
+            // Update tab UI active states
+            document.querySelectorAll(".form-tab").forEach(tab => tab.classList.remove("active"));
+            
+            const formForm = document.getElementById("auth-form");
+            const grpEmail = document.getElementById("grp-email");
+            const grpConfirmPassword = document.getElementById("grp-confirm-password");
+            
+            const authTitle = document.getElementById("auth-title");
+            const authSubtitle = document.getElementById("auth-subtitle");
+            const submitBtn = document.getElementById("submit-btn");
+            const helperText = document.getElementById("form-helper-text");
+            const lblUsername = document.getElementById("lbl-username");
+            const usernameInput = document.getElementById("username-input");
+
+            // Reset inputs
+            formForm.reset();
+
+            if (mode === "student-login") {
+                document.getElementById("tab-student-login").classList.add("active");
+                authTitle.textContent = "Welcome Back";
+                authSubtitle.textContent = "Log in to your student account to resume learning.";
+                lblUsername.textContent = "Username or Email";
+                usernameInput.placeholder = "e.g. student";
+                grpEmail.style.display = "none";
+                document.getElementById("email-input").required = false;
+                grpConfirmPassword.style.display = "none";
+                document.getElementById("confirm-password-input").required = false;
+                submitBtn.textContent = "Sign In";
+                helperText.innerHTML = `Don't have an account? <a href="#" onclick="switchTab('student-signup')">Create one here</a>`;
+            } else if (mode === "student-signup") {
+                document.getElementById("tab-student-signup").classList.add("active");
+                authTitle.textContent = "Create Account";
+                authSubtitle.textContent = "Join NIRIMI Learn to start watching micro-lectures.";
+                lblUsername.textContent = "Choose Username";
+                usernameInput.placeholder = "e.g. johndoe";
+                grpEmail.style.display = "block";
+                document.getElementById("email-input").required = true;
+                grpConfirmPassword.style.display = "block";
+                document.getElementById("confirm-password-input").required = true;
+                submitBtn.textContent = "Register & Sign In";
+                helperText.innerHTML = `Already have a student account? <a href="#" onclick="switchTab('student-login')">Sign in here</a>`;
+            } else if (mode === "instructor-login") {
+                document.getElementById("tab-instructor-login").classList.add("active");
+                authTitle.textContent = "Instructor Portal";
+                authSubtitle.textContent = "Access syllabus settings, reviews, and requests.";
+                lblUsername.textContent = "Instructor Username/Email";
+                usernameInput.placeholder = "e.g. instructor";
+                grpEmail.style.display = "none";
+                document.getElementById("email-input").required = false;
+                grpConfirmPassword.style.display = "none";
+                document.getElementById("confirm-password-input").required = false;
+                submitBtn.textContent = "Instructor Sign In";
+                helperText.innerHTML = `Use your faculty credentials to log in.`;
+            }
+        }
+
+        function handleAuthSubmit(event) {
+            event.preventDefault();
+
+            const usernameVal = document.getElementById("username-input").value.trim();
+            const passwordVal = document.getElementById("password-input").value;
+            const emailVal = document.getElementById("email-input").value.trim();
+            const confirmPassVal = document.getElementById("confirm-password-input").value;
+
+            if (currentMode === "student-signup") {
+                // Perform sign up validation
+                if (passwordVal !== confirmPassVal) {
+                    showToast("Passwords do not match!", "error");
+                    return;
+                }
+                if (passwordVal.length < 5) {
+                    showToast("Password must be at least 5 characters.", "error");
+                    return;
+                }
+
+                const regRes = LMS_DB.register(usernameVal, emailVal, passwordVal, "student");
+                if (regRes.success) {
+                    showToast("Account created successfully! Logging you in...", "success");
+                    // Auto login
+                    LMS_DB.login(usernameVal, passwordVal);
+                    handlePostLoginRedirect();
+                } else {
+                    showToast(regRes.message, "error");
+                }
+            } else if (currentMode === "student-login") {
+                // Log in as student
+                const loginRes = LMS_DB.login(usernameVal, passwordVal);
+                if (loginRes.success) {
+                    if (loginRes.user.role !== "student") {
+                        LMS_DB.logout();
+                        showToast("Please use the Instructor tab to log in as instructor.", "error");
+                        return;
+                    }
+                    showToast(`Welcome back, ${loginRes.user.username}!`, "success");
+                    handlePostLoginRedirect();
+                } else {
+                    showToast(loginRes.message, "error");
+                }
+            } else if (currentMode === "instructor-login") {
+                // Log in as instructor
+                const loginRes = LMS_DB.login(usernameVal, passwordVal);
+                if (loginRes.success) {
+                    if (loginRes.user.role !== "instructor") {
+                        LMS_DB.logout();
+                        showToast("Access denied. These credentials belong to a student.", "error");
+                        return;
+                    }
+                    showToast("Instructor login successful! Accessing portal...", "success");
+                    setTimeout(() => {
+                        window.location.href = "instructors.html";
+                    }, 1200);
+                } else {
+                    showToast(loginRes.message, "error");
+                }
+            }
+        }
+
+        function handlePostLoginRedirect() {
+            const user = LMS_DB.getCurrentUser();
+            if (!user) return;
+
+            // Check if there was an active enrollment request
+            if (enrollCourseId && user.role === "student") {
+                const enrollRes = LMS_DB.enrollStudent(user.id, enrollCourseId);
+                if (enrollRes.success) {
+                    showToast("Enrolled in requested course automatically!", "success");
+                    setTimeout(() => {
+                        window.location.href = `player.html?courseId=${enrollCourseId}`;
+                    }, 1500);
+                    return;
+                }
+            }
+
+            // Normal redirects
+            setTimeout(() => {
+                if (redirectPage) {
+                    window.location.href = redirectPage;
+                } else {
+                    window.location.href = user.role === "student" ? "students.html" : "instructors.html";
+                }
+            }, 1200);
+        }
+
+        // On load, check if redirect hints are in the URL to show helpful toast
+        window.addEventListener("DOMContentLoaded", () => {
+            if (enrollCourseId) {
+                showToast("Please log in or sign up to enroll in your chosen course.", "info");
+            }
+        });
+    </script>
+</body>
+</html>

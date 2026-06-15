@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIRIMI Learn - Modern LMS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- NAVIGATION BAR -->
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">
+            NIRIMI Learn <span class="logo-dot"></span>
+        </a>
+        <div class="nav-links">
+            <!-- Populated dynamically by db.js -->
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="hero-section">
+        <div class="hero-tag">New Season Courses Live</div>
+        <h1 class="hero-title">Unlock Your Potential with Modern Learning</h1>
+        <p class="hero-subtitle">
+            Explore premium courses, study at your own pace with in-app video modules, and track your progress to graduation.
+        </p>
+        <div id="hero-cta-container">
+            <a href="courses.html" class="nav-btn nav-btn-primary">Browse All Courses</a>
+        </div>
+    </section>
+
+    <!-- CAROUSEL SLIDESHOW -->
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Featured Spotlights</h2>
+        </div>
+        
+        <div class="slideshow-container">
+            <!-- Slide 1 -->
+            <div class="mySlides">
+                <div class="slide-image-wrapper" style="background-image: url('assets/images/course_intro_programming.png');"></div>
+                <div class="slide-content">
+                    <div class="slide-category">General</div>
+                    <h2 class="slide-title">Introduction to Programming</h2>
+                    <p class="slide-desc">Build logic pathways, understand computers under the hood, and start your journey with programming fundamentals.</p>
+                    <a href="courses.html" class="slide-btn">Start Learning</a>
+                </div>
+            </div>
+
+            <!-- Slide 2 -->
+            <div class="mySlides">
+                <div class="slide-image-wrapper" style="background-image: url('assets/images/course_react.png');"></div>
+                <div class="slide-content">
+                    <div class="slide-category">Frontend Development</div>
+                    <h2 class="slide-title">React.js Essentials</h2>
+                    <p class="slide-desc">Create lighting fast web layouts and master user-interfaces with component architectures and React hooks.</p>
+                    <a href="courses.html" class="slide-btn">Enroll Now</a>
+                </div>
+            </div>
+
+            <!-- Slide 3 -->
+            <div class="mySlides">
+                <div class="slide-image-wrapper" style="background-image: url('assets/images/course_machine_learning.png');"></div>
+                <div class="slide-content">
+                    <div class="slide-category">Artificial Intelligence</div>
+                    <h2 class="slide-title">Machine Learning Basics</h2>
+                    <p class="slide-desc">Step into the future of data models. Learn regressions, neural pathways, and build your first AI models.</p>
+                    <a href="courses.html" class="slide-btn">Start Studying</a>
+                </div>
+            </div>
+
+            <!-- Carousel Controls -->
+            <a class="prev" onclick="moveSlides(-1)">&#10094;</a>
+            <a class="next" onclick="moveSlides(1)">&#10095;</a>
+        </div>
+    </div>
+
+    <!-- FEATURED COURSE SECTION -->
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Popular Courses</h2>
+            <a href="courses.html" style="color: var(--primary); text-decoration: none; font-weight: 600; font-size: 14px;">View All Courses &rarr;</a>
+        </div>
+
+        <div class="course-grid" id="featured-course-grid">
+            <!-- Dynamically populated via script -->
+        </div>
+    </div>
+
+    <!-- STATS / HIGHLIGHTS SECTION -->
+    <div class="container" style="margin-top: 60px;">
+        <div style="background: var(--bg-surface); padding: 40px; border-radius: var(--radius-lg); border: 1px solid var(--border-color); text-align: center;">
+            <h2 style="font-size: 28px; margin-bottom: 30px;">Why Learn on NIRIMI?</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px;">
+                <div>
+                    <div style="font-size: 36px; margin-bottom: 10px;">📺</div>
+                    <h3 style="margin-bottom: 8px;">In-App Playback</h3>
+                    <p style="color: var(--text-muted); font-size: 14px;">Watch lessons and video tutorials directly on our site without distacting redirections.</p>
+                </div>
+                <div>
+                    <div style="font-size: 36px; margin-bottom: 10px;">📈</div>
+                    <h3 style="margin-bottom: 8px;">Progress Tracking</h3>
+                    <p style="color: var(--text-muted); font-size: 14px;">Mark video topics complete and watch your course progress bar move to 100%.</p>
+                </div>
+                <div>
+                    <div style="font-size: 36px; margin-bottom: 10px;">🎓</div>
+                    <h3 style="margin-bottom: 8px;">Instructor Portal</h3>
+                    <p style="color: var(--text-muted); font-size: 14px;">Create custom courses, add video curricula, and analyze student registration counts.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 NIRIMI Learn. Designed for next-generation styles and microlearning.</p>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script src="assets/js/db.js"></script>
+    <script>
+        // --- Slideshow Script ---
+        let slideIndex = 1;
+        let slideTimer;
+        showSlides(slideIndex);
+
+        function moveSlides(n) {
+            clearTimeout(slideTimer);
+            showSlides(slideIndex += n);
+        }
+
+        function showSlides(n) {
+            let i;
+            let slides = document.getElementsByClassName("mySlides");
+            if (n > slides.length) {slideIndex = 1}    
+            if (n < 1) {slideIndex = slides.length}
+            
+            for (i = 0; i < slides.length; i++) {
+                slides[i].style.display = "none";  
+            }
+            
+            slides[slideIndex-1].style.display = "block";  
+            
+            // Auto slide every 5 seconds
+            slideTimer = setTimeout(() => {
+                showSlides(slideIndex += 1);
+            }, 5000);
+        }
+
+        // --- Load Courses and CTA States ---
+        document.addEventListener("DOMContentLoaded", () => {
+            const courses = LMS_DB.getCourses().slice(0, 3); // Get first 3 courses
+            const grid = document.getElementById("featured-course-grid");
+            const ctaContainer = document.getElementById("hero-cta-container");
+            const currentUser = LMS_DB.getCurrentUser();
+
+            // Dynamic Hero CTA button state
+            if (currentUser) {
+                if (currentUser.role === "student") {
+                    ctaContainer.innerHTML = `
+                        <a href="students.html" class="nav-btn nav-btn-primary" style="margin-right: 12px;">Go to My Dashboard</a>
+                        <a href="courses.html" class="nav-btn nav-btn-outline">Browse Courses</a>
+                    `;
+                } else {
+                    ctaContainer.innerHTML = `
+                        <a href="instructors.html" class="nav-btn nav-btn-primary">Go to Instructor Portal</a>
+                    `;
+                }
+            }
+
+            // Populate course cards
+            grid.innerHTML = courses.map(course => {
+                const enrolledText = currentUser && currentUser.role === "student" ? "Enroll Now" : "View Course";
+                return `
+                    <div class="card">
+                        <div class="card-img-container">
+                            <span class="card-tag">${course.category}</span>
+                            <img src="${course.image}" alt="${course.title}">
+                        </div>
+                        <div class="card-body">
+                            <h3 class="card-title">${course.title}</h3>
+                            <p class="card-desc">${course.description}</p>
+                            <div class="card-footer">
+                                <span class="card-instructor">By ${course.instructor}</span>
+                                <a href="courses.html" class="card-action-btn">${enrolledText}</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        });
+    </script>
+</body>
+</html>

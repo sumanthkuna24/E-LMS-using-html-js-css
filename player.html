@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIRIMI Learn - Course Player</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- NAVIGATION BAR -->
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">
+            NIRIMI Learn <span class="logo-dot"></span>
+        </a>
+        <div class="nav-links">
+            <!-- Populated dynamically by db.js -->
+        </div>
+    </nav>
+
+    <!-- PLAYER WORKSPACE CONTAINER -->
+    <div class="container">
+        
+        <!-- Auth check placeholder -->
+        <div id="player-error-message" style="display: none; text-align: center; padding: 100px 20px;">
+            <span style="font-size: 64px;">⚠️</span>
+            <h2 id="player-error-title" style="margin-top: 20px; margin-bottom: 10px;">Enrollment Required</h2>
+            <p id="player-error-text" style="color: var(--text-muted); margin-bottom: 30px;">You need to be enrolled in this course to view its lessons.</p>
+            <a href="courses.html" class="nav-btn nav-btn-primary">Browse Course Directory</a>
+        </div>
+
+        <div id="player-workspace" style="display: none;">
+            
+            <!-- Breadcrumbs navigation -->
+            <div style="margin-bottom: 20px;">
+                <a href="students.html" style="color: var(--primary); text-decoration: none; font-size: 14px; font-weight: 600;">
+                    &larr; Back to My Dashboard
+                </a>
+            </div>
+
+            <div class="player-layout">
+                
+                <!-- LEFT MAIN COLUMN: VIDEO FRAME & DETAILS -->
+                <div class="player-main-column">
+                    <!-- YouTube Responsive Container -->
+                    <div class="video-container">
+                        <iframe id="youtube-player" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+                    </div>
+
+                    <!-- Lesson Information -->
+                    <div class="player-details-card">
+                        <div class="player-header-row">
+                            <div>
+                                <span id="current-lesson-index" style="color: var(--primary); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Lesson 1</span>
+                                <h2 id="current-lesson-title" class="player-course-title">Loading Lesson Title...</h2>
+                            </div>
+                            <button id="mark-complete-btn" class="lesson-mark-completed-btn" onclick="toggleCurrentLessonCompletion()">
+                                <span class="checkbox-state-icon">☐</span> Mark Completed
+                            </button>
+                        </div>
+
+                        <div style="border-top: 1px solid var(--border-color); padding-top: 20px; margin-top: 20px;">
+                            <h4 style="margin-bottom: 10px;">About This Module</h4>
+                            <p id="course-description-text" style="color: var(--text-muted); font-size: 14px; line-height: 1.6;">
+                                Course description details.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT SIDEBAR: COURSE PROGRESS & LESSON LIST -->
+                <aside class="player-sidebar-column">
+                    
+                    <div class="sidebar-header">
+                        <h3 id="sidebar-course-title">Course Name</h3>
+                        <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 12px;" id="sidebar-instructor-name">By Instructor Name</p>
+                        
+                        <div class="progress-container">
+                            <div id="sidebar-progress-bar" class="progress-bar" style="width: 0%"></div>
+                        </div>
+                        <span id="sidebar-progress-text" class="progress-text">0% Complete</span>
+                    </div>
+
+                    <!-- Module Checklist -->
+                    <ul class="lessons-list" id="sidebar-lessons-list">
+                        <!-- Populated dynamically -->
+                    </ul>
+
+                </aside>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 NIRIMI Learn. Designed for next-generation styles and microlearning.</p>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script src="assets/js/db.js"></script>
+    <script>
+        let courseId = "";
+        let enrollment = null;
+        let courseData = null;
+        let activeLessonIndex = 0;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const user = LMS_DB.getCurrentUser();
+            const urlParams = new URLSearchParams(window.location.search);
+            courseId = urlParams.get("courseId");
+
+            // 1. Authenticate user role
+            if (!user || user.role !== "student") {
+                showPlayerError("Access Denied", "You must be logged in as a student to access the player.", "login.html?redirect=" + encodeURIComponent(window.location.search));
+                return;
+            }
+
+            // 2. Validate course query parameter
+            if (!courseId) {
+                showPlayerError("Invalid Request", "No course ID specified. Please select a course to learn.", "courses.html");
+                return;
+            }
+
+            courseData = LMS_DB.getCourse(courseId);
+            if (!courseData) {
+                showPlayerError("Course Not Found", "The requested course could not be located in our catalog.", "courses.html");
+                return;
+            }
+
+            // 3. Check enrollment
+            const enrollments = LMS_DB.getStudentEnrollments(user.id);
+            enrollment = enrollments.find(e => e.courseId === courseId);
+            
+            if (!enrollment) {
+                showPlayerError("Enrollment Required", `You are not enrolled in "${courseData.title}" yet. Please enroll first.`, `courses.html`);
+                return;
+            }
+
+            // Valid session - boot player
+            document.getElementById("player-workspace").style.display = "block";
+            
+            // Render Course details
+            document.getElementById("sidebar-course-title").textContent = courseData.title;
+            document.getElementById("sidebar-instructor-name").textContent = "By " + courseData.instructor;
+            document.getElementById("course-description-text").textContent = courseData.description;
+
+            // Load initial lesson
+            loadLesson(0);
+        });
+
+        function showPlayerError(title, text, actionUrl) {
+            document.getElementById("player-error-title").textContent = title;
+            document.getElementById("player-error-text").textContent = text;
+            const actionBtn = document.querySelector("#player-error-message a");
+            actionBtn.href = actionUrl;
+            actionBtn.textContent = title.includes("Login") || title.includes("Access") ? "Sign In" : "Explore Courses";
+            document.getElementById("player-error-message").style.display = "block";
+        }
+
+        function loadLesson(index) {
+            activeLessonIndex = index;
+            const lesson = courseData.lessons[index];
+            if (!lesson) return;
+
+            // Load Youtube embed iframe
+            const iframe = document.getElementById("youtube-player");
+            iframe.src = `https://www.youtube.com/embed/${lesson.videoId}?enablejsapi=1&rel=0`;
+
+            // Load Lesson text fields
+            document.getElementById("current-lesson-index").textContent = `Lesson ${index + 1} of ${courseData.lessons.length}`;
+            document.getElementById("current-lesson-title").textContent = lesson.title;
+
+            // Update Active check states in sidebar and checkboxes
+            updatePlayerUI();
+        }
+
+        function updatePlayerUI() {
+            const user = LMS_DB.getCurrentUser();
+            // Re-fetch enrollment from db to get current completion updates
+            const enrollments = LMS_DB.getStudentEnrollments(user.id);
+            enrollment = enrollments.find(e => e.courseId === courseId);
+
+            // Update Progress Bar
+            document.getElementById("sidebar-progress-bar").style.width = `${enrollment.progressPercent}%`;
+            document.getElementById("sidebar-progress-text").textContent = `${enrollment.progressPercent}% Complete`;
+
+            // Render Checklist in Sidebar
+            const list = document.getElementById("sidebar-lessons-list");
+            list.innerHTML = courseData.lessons.map((lesson, idx) => {
+                const isCompleted = enrollment.completedLessons[idx];
+                const isActive = idx === activeLessonIndex;
+                
+                const checkIcon = isCompleted ? `<span class="lesson-status-icon completed">✓</span>` : `<span class="lesson-status-icon pending">○</span>`;
+                const activeClass = isActive ? "active" : "";
+
+                return `
+                    <li class="lesson-item ${activeClass}" onclick="loadLesson(${idx})">
+                        ${checkIcon}
+                        <div class="lesson-info">
+                            <span class="lesson-item-title">${lesson.title}</span>
+                            <div class="lesson-item-duration">Duration: ${lesson.duration}</div>
+                        </div>
+                    </li>
+                `;
+            }).join('');
+
+            // Update Mark Completed Button State
+            const btn = document.getElementById("mark-complete-btn");
+            const isCompleted = enrollment.completedLessons[activeLessonIndex];
+            
+            if (isCompleted) {
+                btn.className = "lesson-mark-completed-btn completed";
+                btn.innerHTML = `<span class="checkbox-state-icon">✓</span> Lesson Completed`;
+            } else {
+                btn.className = "lesson-mark-completed-btn";
+                btn.innerHTML = `<span class="checkbox-state-icon">☐</span> Mark Completed`;
+            }
+        }
+
+        function toggleCurrentLessonCompletion() {
+            const user = LMS_DB.getCurrentUser();
+            const isCurrentlyCompleted = enrollment.completedLessons[activeLessonIndex];
+            
+            // Toggle
+            const newStatus = !isCurrentlyCompleted;
+            
+            const res = LMS_DB.updateLessonProgress(user.id, courseId, activeLessonIndex, newStatus);
+            if (res.success) {
+                if (newStatus) {
+                    showToast("Module marked complete! Keep going!", "success");
+                } else {
+                    showToast("Module marked incomplete.", "info");
+                }
+                updatePlayerUI();
+            } else {
+                showToast(res.message, "error");
+            }
+        }
+    </script>
+</body>
+</html>
